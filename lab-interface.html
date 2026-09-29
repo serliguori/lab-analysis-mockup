@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attività di dettaglio del campione di laboratorio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+    
+    .container { display: flex; height: 100vh; }
+    
+    .sidebar { width: 200px; background: #1a7f7f; color: white; padding: 20px; overflow-y: auto; }
+    .sidebar h3 { margin: 0 0 20px 0; font-size: 14px; }
+    .sidebar-item { padding: 12px; margin: 8px 0; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.1); }
+    .sidebar-item.active { background: #0d5a5a; }
+    
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .header { background: #1a7f7f; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { margin: 0; font-size: 16px; }
+    .header-info { font-size: 12px; opacity: 0.85; }
+    
+    .patient-info { background: white; padding: 16px 20px; border-bottom: 1px solid #ddd; display: flex; gap: 30px; font-size: 13px; }
+    .patient-info div { display: flex; gap: 8px; }
+    .patient-info strong { color: #333; }
+    
+    .alert-warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 16px 20px; border-radius: 4px; font-size: 13px; color: #856404; }
+    
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #ddd; background: white; padding: 0 20px; }
+    .tab { padding: 12px 16px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; }
+    .tab:hover { color: #1a7f7f; }
+    .tab.active { color: #1a7f7f; border-bottom-color: #1a7f7f; }
+    
+    .content-area { flex: 1; overflow-y: auto; background: white; padding: 20px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Urinocultura Tab */
+    .section-title { font-size: 14px; font-weight: 600; color: #333; margin: 20px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+    .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .form-field { display: flex; flex-direction: column; }
+    .form-field label { font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+    .form-field input, .form-field select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
+    
+    .status-badges { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-completed { background: #d4edda; color: #155724; }
+    .badge-pending { background: #e2e3e5; color: #383d41; }
+    .badge-attention { background: #fff3cd; color: #856404; }
+    
+    .result-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 16px 0; }
+    .result-table th { background: #f8f9fa; padding: 8px; text-align: left; font-weight: 600; border: 1px solid #dee2e6; }
+    .result-table td { padding: 8px; border: 1px solid #dee2e6; }
+    .result-table tr:hover { background: #f8f9fa; }
+    
+    .checkbox-column { display: flex; align-items: center; }
+    .checkbox-column input { margin-right: 8px; }
+    
+    .bacteria-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 4px; border-left: 3px solid #e8622a; }
+    .bacteria-name { font-weight: 500; }
+    .bacteria-sensitivity { display: flex; gap: 4px; }
+    .sensitivity-dot { width: 20px; height: 20px; border-radius: 50%; background: #dc3545; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold; }
+    
+    .action-buttons { display: flex; gap: 8px; margin-top: 20px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-primary { background: #e8622a; color: white; }
+    .btn-primary:hover { background: #cf5321; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-secondary:hover { background: #5a6268; }
+    .btn-outline { background: transparent; border: 1px solid #1a7f7f; color: #1a7f7f; }
+    .btn-outline:hover { background: #f0f0f0; }
+    
+    .note-section { background: #f8f9fa; padding: 12px; border-radius: 4px; margin: 16px 0; }
+    .note-section textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; min-height: 80px; font-family: inherit; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>📋 Pazienti</h3>
+    <div class="sidebar-item active">EL BAHJA RACHIDA</div>
+    <div class="sidebar-item">ALTRO PAZIENTE</div>
+    <div class="sidebar-item">ALTRO PAZIENTE 2</div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>Attività di dettaglio del campione di laboratorio</h1>
+      </div>
+      <div class="header-info">
+        ID Paziente: AREAS_3153801 | Codice Aux: 20283000035 | Data richiesta: 5/5/2026 15:41
+      </div>
+    </div>
+    
+    <!-- Patient Info -->
+    <div class="patient-info">
+      <div><strong>Nome:</strong> EL BAHJA RACHIDA</div>
+      <div><strong>Data nascita:</strong> 17/10/1962</div>
+      <div><strong>Sesso:</strong> F</div>
+      <div><strong>Medico richiesta:</strong> Dr. Rossi</div>
+    </div>
+    
+    <!-- Warning Alert -->
+    <div class="alert-warning">
+      ⚠️ È necessario selezionare uno o più campioni per poter proseguire con l'azione desiderata
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('urinocultura')">Urinocultura</div>
+      <div class="tab" onclick="switchTab('microbiologia')">Microbiologia</div>
+    </div>
+    
+    <!-- Content Area -->
+    <div class="content-area">
+      
+      <!-- URINOCULTURA TAB -->
+      <div id="urinocultura" class="tab-content active">
+        <div class="status-badges">
+          <span class="badge badge-completed">✓ Completato da validare</span>
+          <span class="badge badge-pending">Ripetuto</span>
+          <span class="badge badge-attention">Valori di attenzione</span>
+        </div>
+        
+        <div class="section-title">Informazioni Campione</div>
+        <div class="form-group">
+          <div class="form-field">
+            <label>Campione</label>
+            <input type="text" value="4000003502" readonly>
+          </div>
+          <div class="form-field">
+            <label>Data Accettazione</label>
+            <input type="text" value="05/05/2026 15:41" readonly>
+          </div>
+          <div class="form-field">
+            <label>Materiale</label>
+            <input type="text" value="Sede" readonly>
+          </div>
+        </div>
+        
+        <div class="section-title">Analisi</div>
+        <div class="result-table">
+          <tr>
+            <th>Analisi</th>
+            <th>Descrizione</th>
+            <th>Metodo</th>
+            <th>Note</th>
+            <th>Risultato</th>
+          </tr>
+          <tr>
+            <td><input type="checkbox"> 71010</td>
+            <td>Urinocultura</td>
+            <td>UROC</td>
+            <td><span style="background:#fff3cd; padding:2px 6px; border-radius:3px;">In approfondimento[POS-IA]</span></td>
+            <td style="color: #c62828; font-weight: 600;">test nota</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td colspan="4">
+              <small>note: 1.2341234123412341234E111234123412341234123412341</small>
+            </td>
+          </tr>
+        </div>
+        
+        <div class="section-title">Dettagli Coltura</div>
+        <div class="form-group">
+          <div class="form-field">
+            <label>Isolato</label>
+            <select>
+              <option>Batteri Gram +[+]</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Carica</label>
+            <input type="text" value="1.000.000 ufc/ml">
+          </div>
+          <div class="form-field">
+            <label>CardID</label>
+            <input type="text" value="No Card ID [NO ID]">
+          </div>
+          <div class="form-field">
+            <label>CardBg</label>
+            <input type="text" value="pannello Micronaut aner...">
+          </div>
+        </div>
+        
+        <div class="section-title">Antibiogramma</div>
+        <div class="bacteria-row">
+          <span class="bacteria-name">P. aeruginosa</span>
+          <div class="bacteria-sensitivity">
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+            <div class="sensitivity-dot" title="Resistente">R</div>
+          </div>
+        </div>
+        
+        <div class="section-title">Note Cliniche</div>
+        <div class="note-section">
+          <textarea placeholder="Aggiungi note...">Nota: 1234123412341234 | Riferimento prova: 2025-08-10</textarea>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-primary">Convalida Risultati</button>
+          <button class="btn btn-outline">Modifica</button>
+          <button class="btn btn-secondary">Archivia</button>
+        </div>
+      </div>
+      
+      <!-- MICROBIOLOGIA TAB -->
+      <div id="microbiologia" class="tab-content">
+        <div class="status-badges">
+          <span class="badge badge-pending">In elaborazione</span>
+          <span class="badge badge-attention">Valori di attenzione</span>
+        </div>
+        
+        <div class="section-title">Informazioni Campione</div>
+        <div class="form-group">
+          <div class="form-field">
+            <label>Campione</label>
+            <input type="text" value="4000003502" readonly>
+          </div>
+          <div class="form-field">
+            <label>Data Accettazione</label>
+            <input type="text" value="05/05/2026 15:41" readonly>
+          </div>
+          <div class="form-field">
+            <label>Materiale</label>
+            <input type="text" value="Secreto bronchiale" readonly>
+          </div>
+          <div class="form-field">
+            <label>Conservazione</label>
+            <input type="text" value="Refrigerato">
+          </div>
+        </div>
+        
+        <div class="section-title">Esami Microbiologici</div>
+        <div class="result-table">
+          <tr>
+            <th>Esame</th>
+            <th>Descrizione</th>
+            <th>Metodo</th>
+            <th>Data Inizio</th>
+            <th>Stato</th>
+          </tr>
+          <tr>
+            <td><input type="checkbox"> 72001</td>
+            <td>Coltura aerobica</td>
+            <td>Coltura Std</td>
+            <td>05/05/2026</td>
+            <td><span style="background:#e7f3ff; padding:2px 6px; border-radius:3px; color:#004085;">In corso</span></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"> 72002</td>
+            <td>Ricerca Funghi</td>
+            <td>Sabouraud</td>
+            <td>05/05/2026</td>
+            <td><span style="background:#e7f3ff; padding:2px 6px; border-radius:3px; color:#004085;">In corso</span></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"> 72003</td>
+            <td>Ricerca Micobatteri</td>
+            <td>Löwenstein</td>
+            <td>06/05/2026</td>
+            <td><span style="background:#d4edda; padding:2px 6px; border-radius:3px; color:#155724;">Completato</span></td>
+          </tr>
+        </div>
+        
+        <div class="section-title">Risultati Preliminari</div>
+        <div class="bacteria-row">
+          <span class="bacteria-name">Pseudomonas aeruginosa</span>
+          <span style="font-size: 11px; color: #666;">+++ (Numerosi)</span>
+        </div>
+        <div class="bacteria-row">
+          <span class="bacteria-name">Staphylococcus aureus</span>
+          <span style="font-size: 11px; color: #666;">++ (Moderati)</span>
+        </div>
+        <div class="bacteria-row">
+          <span class="bacteria-name">Aspergillus fumigatus</span>
+          <span style="font-size: 11px; color: #666;">+ (Raro)</span>
+        </div>
+        
+        <div class="section-title">Osservazioni Morfologiche</div>
+        <div class="note-section">
+          <textarea placeholder="Aggiungi osservazioni...">Campione con buona qualità. Gram: numerosi cocchi gram-positivi e bastoncelli gram-negativi.</textarea>
+        </div>
+        
+        <div class="section-title">Antibiogramma (in corso)</div>
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 4px; color: #666; font-size: 12px;">
+          ⏳ In attesa dei risultati di sensibilità agli antibiotici. Generalmente disponibili in 24-48 ore.
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-primary">Salva Risultati Preliminari</button>
+          <button class="btn btn-outline">Aggiungi Osservazione</button>
+          <button class="btn btn-secondary">Richiedi Revisione</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tabName) {
+    // Nascondi tutti i tab content
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+    
+    // Rimuovi active da tutti i tab
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Mostra il tab selezionato
+    document.getElementById(tabName).classList.add('active');
+    
+    // Aggiungi active al tab cliccato
+    event.target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
